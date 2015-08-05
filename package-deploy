@@ -1,0 +1,349 @@
+#!/bin/bash
+
+host=$(hostname)
+readonly scriptDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source $scriptDir/package-deploy.cfg
+readonly taredDeployment=${yearMonthDateHourMin}_$sourceDeployment.tar.gz
+completionState='Start'
+readonly failure=1
+readonly success=0
+readonly remoteWorkScript="remoteWork"
+
+echo                                                                                                                           | tee -a $logFile
+echo -e    "\033[1;45m+==============================================================================+\033[0m"                 | tee -a $logFile
+echo -e    "\033[1;45m|                                                                              |\033[0m"                 | tee -a $logFile
+echo -e    "\033[1;45m|                  Welcome to the BinaryMist Deployment Tool!                  |\033[0m"                 | tee -a $logFile
+echo -e    "\033[1;45m|                                                                              |\033[0m"                 | tee -a $logFile
+echo -e    "\033[1;45m+==============================================================================+\033[0m"                 | tee -a $logFile
+echo -e "\033[1;30;47m                                                                                \033[0m"                 | tee -a $logFile
+echo -e "\033[1;30;47m               I deploy from a project directory of your choosing               \033[0m"                 | tee -a $logFile
+echo -e "\033[1;30;47m--------------------------------------------------------------------------------\033[0m"                 | tee -a $logFile
+
+
+print_date_time_host() {
+defaultDate=$(date)
+echo                                                                                                                           | tee -a $logFile
+echo                                                                                                                           | tee -a $logFile
+echo "--------------------------------------------------------------------------------"                                        | tee -a $logFile
+echo "$completionState time: $defaultDate                   Host:$host"                                                        | tee -a $logFile
+echo "--------------------------------------------------------------------------------"                                        | tee -a $logFile
+echo                                                                                                                           | tee -a $logFile
+completionState='End  '
+}
+
+print_date_time_host
+
+pause(){
+   read -n1 -rsp $'Press any key to continue...\n'                                                                             | tee -a $logFile
+}
+######################################################################################################################################
+user_input_is_sanitary() {
+   # Using $1 only produces the first part of the string if it has horisontal white space.
+   declare -r param="$@"   
+   declare -ri length=${#param}
+
+   if [ $length -lt 2 -o $length -gt 63 ] ; then
+      echo "$param"                                                                                                            | tee -a $logFile
+      echo "length invalid"                                                                                                    | tee -a $logFile
+      return $failure
+   fi
+   case $param in
+       -* )
+         echo "not ok : start with hyphen"                                                                                     | tee -a $logFile
+         return $failure ;;
+       *- )
+         echo "not ok : end with hyphen"                                                                                       | tee -a $logFile
+         return $failure ;;
+       *[^a-zA-Z0-9-]* )
+         echo "not ok : special character"                                                                                     | tee -a $logFile
+         return $failure ;;
+   esac
+   return $success
+}
+
+user_port_input_is_sanitary() {
+   # Using $1 only produces the first part of the string if it has horisontal white space.
+   declare -r port="$@"
+   if (( $port < 1 || $port > 65535 )); then
+      echo "Port \"$port\" is an invalid port number"
+      return $failure
+   fi
+   return $success
+}
+######################################################################################################################################
+shrinkwrap() {
+   echo                                                                                                                        | tee -a $logFile
+   prompt_and_collect_source_deployment_from_user
+   until user_input_is_sanitary $sourceDeployment; do
+      prompt_and_collect_source_deployment_from_user
+   done
+   echo "You have chosen the \"$sourceDeployment\" source code directory that you intend to deploy the contents of"            | tee -a $logFile  
+   
+   echo "--------------------------------Shrinkwrap Start--------------------------------"                                     | tee -a $logFile
+   echo "Let's shrinkwrap the ${sourceDeployment}"                                                                             | tee -a $logFile
+   echo "cd'ing into \"${deploymentSourceDir}\""                                                                               | tee -a $logFile
+   cd $deploymentSourceDir && echo "We are now in \"$(pwd)\""                                                                  | tee -a $logFile 
+   echo "Shrinkwrapping the contents of \"${deploymentSourceDir}\""                                                            | tee -a $logFile
+   npm shrinkwrap 2>&1                                                                                                         | tee -a $logFile
+   echo "--------------------------------Shrinkwrap Done---------------------------------"                                     | tee -a $logFile
+   echo                                                                                                                        | tee -a $logFile
+}
+######################################################################################################################################
+package_deployment_artifact() {
+   echo                                                                                                                        | tee -a $logFile
+   echo "cd'ing into \"${deploymentSourceDir}\""                                                                               | tee -a $logFile
+   cd $deploymentSourceDir && echo "We are now in \"$(pwd)\""                                                                  | tee -a $logFile 
+
+   echo "The following are the target files & dirs from the root dir to be packaged into \"$homeDir/${taredDeployment}\":"     | tee -a $logFile
+   ls -liah                                                                                                                    | tee -a $logFile
+   echo                                                                                                                        | tee -a $logFile
+   pause
+   echo "Right. Lets tar up..."                                                                                                | tee -a $logFile
+
+   echo "Checking we're in the deploymentSourceDir directory. That's: \"${deploymentSourceDir}\" ..."                          | tee -a $logFile
+   if [ $deploymentSourceDir == $(pwd) ] ; then
+      echo "... And we are ..."                                                                                                | tee -a $logFile
+      echo "Now lets create \"$homeDir/${taredDeployment}\""                                                                   | tee -a $logFile
+      echo "Packing the following files ..."                                                                                   | tee -a $logFile
+      echo                                                                                                                     | tee -a $logFile
+      tar -cvzf $homeDir/${taredDeployment} * 2>&1                                                                             | tee -a $logFile
+   else
+      echo "\"$deploymentSourceDir\" was not equal to \"$(pwd)\""                                                              | tee -a $logFile
+      echo "Exiting with failure code."                                                                                        | tee -a $logFile
+      exit $failure                                                                                                            | tee -a $logFile
+   fi
+}
+######################################################################################################################################
+scp_tared_deployment() {
+   echo 
+   scp -qv -P $sshPort $taredDeployment $targetServerUser@$targetServer:~ 2>&1 | grep -v debug                                 | tee -a $logFile
+   declare -r result=$?
+   return $result
+}
+
+#scp_remote_work_script() {
+#   echo 
+#   scp -qv -P $sshPort $remoteWorkScript $targetServerUser@$targetServer:~ 2>&1 | grep -v debug
+#   declare -r result=$?
+#   return $result
+#}
+
+prompt_and_collect_target_server_from_user() {
+   printf "\e[1mThe current server selected is: \"\033[0m"; printf "\e[1;45m$targetServer\033[0m"; printf "\e[1m\". Choose from the following menu whether you would like to:\033[0m\n";
+
+   select choice in "Continue with this selection" "Select a different target server"; do
+      case $choice in
+         "Continue with this selection" )
+            echo "User selected to continue with current selection of: \"$targetServer\""                                      >> $logFile
+            break;;
+         "Select a different target server" )
+            echo "User selected to select a different target server"                                                           >> $logFile
+            read -e -p "Please enter the server name that you would like to deploy to: " targetServer
+            targetServer=$(echo $targetServer | tr -d [:blank:])
+            echo "Target server \"$targetServer\" was entered"                                                                 >> $logFile
+            break;;
+      esac    
+   done
+}
+
+prompt_and_collect_source_deployment_from_user() {
+   printf "\e[1mThe current source code directory containing the source you want deployed is: \"\033[0m"; printf "\e[1;45m$sourceDeployment\033[0m"; printf "\e[1m\". Choose from the following menu whether you would like to:\033[0m\n";
+   
+   select choice in "Continue with this selection" "Select a different source code directory"; do
+      case $choice in
+         "Continue with this selection" )
+            echo "User selected to continue with current selection of: \"$sourceDeployment\""                                  >> $logFile
+            break;;
+         "Select a different source code directory" )
+            echo "User selected to select a different source code directory"                                                   >> $logFile
+            read -e -p "Please enter the source code directory containing the source you intend to deploy: "sourceDeployment
+            echo "Source code directory \"$sourceDeployment\" was entered"                                                     >> $logFile
+            break;;
+      esac    
+   done
+}
+
+prompt_and_collect_target_server_user_from_user() {
+   printf "\e[1mThe current target server user you want to run the project upgrade as is: \"\033[0m"; printf "\e[1;45m$targetServerUser\033[0m"; printf "\e[1m\". Choose from the following menu whether you would like to:\033[0m\n";
+   
+   select choice in "Continue with this selection" "Select a different target server user"; do
+      case $choice in
+         "Continue with this selection" )
+            echo "User selected to continue with current selection of: \"$targetServerUser\""                                  >> $logFile
+            break;;
+         "Select a different target server user" )
+            echo "User selected to select a different target server user"                                                      >> $logFile
+            read -e -p "Please enter the target server user you want to run the project upgrade as: " targetServerUser
+            targetServerUser=$(echo $targetServerUser | tr -d [:blank:])
+            echo "Target server user \"$targetServerUser\" was entered"                                                        >> $logFile
+            break;;
+      esac    
+   done
+}
+
+prompt_and_collect_target_server_ssh_port_from_user() {
+   printf "\e[1mThe current SSH port you want to use for the target server is: \"\033[0m"; printf "\e[1;45m$sshPort\033[0m"; printf "\e[1m\". Choose from the following menu whether you would like to:\033[0m\n";
+   
+   select choice in "Continue with this selection" "Select a different target server SSH port"; do
+      case $choice in
+         "Continue with this selection" )
+            echo "User selected to continue with current selection of: \"$sshPort\""                                           >> $logFile
+            break;;
+         "Select a different target server SSH port" )
+            echo "User selected to select a different target server SSH port"                                                  >> $logFile
+            read -e -p "Please enter the SSH port you want to use for the target server: " sshPort            
+            sshPort=$(echo $sshPort | tr -d [:blank:])
+            echo "Port \"$sshPort\" was entered"                                                                               >> $logFile
+            break;;
+      esac    
+   done
+}
+
+collect_target_server_from_user() {
+   echo                                                                                                                        | tee -a $logFile
+   prompt_and_collect_target_server_from_user
+   until user_input_is_sanitary $targetServer; do
+      prompt_and_collect_target_server_from_user
+   done
+   printf "You have chosen to deploy to target server \""                                                                      | tee -a $logFile
+   printf "\e[1;45m$targetServer\033[0m"                                                                                       | tee -a $logFile
+   printf "\"\n"                                                                                                               | tee -a $logFile
+}
+
+collect_target_server_user_from_user() {
+   echo                                                                                                                        | tee -a $logFile
+   prompt_and_collect_target_server_user_from_user
+   until user_input_is_sanitary $targetServerUser; do
+      prompt_and_collect_target_server_user_from_user
+   done
+   printf "You have chosen \""                                                                                                 | tee -a $logFile
+   printf "\e[1;45m$targetServerUser\033[0m"                                                                                   | tee -a $logFile
+   printf "\" as your target server user\n"                                                                                    | tee -a $logFile
+}
+
+collect_target_server_ssh_port_from_user() {
+   echo                                                                                                                        | tee -a $logFile
+   prompt_and_collect_target_server_ssh_port_from_user
+   until user_port_input_is_sanitary $sshPort; do
+      prompt_and_collect_target_server_ssh_port_from_user
+   done
+   printf "You have chosen SSH port \""                                                                                        | tee -a $logFile
+   printf "\e[1;45m$sshPort\033[0m"                                                                                            | tee -a $logFile
+   printf "\"\n"                                                                                                               | tee -a $logFile
+}
+
+#collect_source_deployment_from_user() {
+#   echo                                                                                                              | tee -a $logFile
+#   prompt_and_collect_source_deployment_from_user
+#   until user_input_is_sanitary $sourceDeployment; do
+#      prompt_and_collect_source_deployment_from_user
+#   done
+#   printf "You have chosen the \""; printf "\e[1;45m$sourceDeployment\033[0m"; printf "\" source code directory that you intend to deploy the contents of\n"              | tee -a $logFile
+#}
+
+deploy_package_to_target_servers_home_dir() {
+
+   collect_target_server_from_user
+   # Todo: I don't think we need the following line here.
+   #collect_source_deployment_from_user
+   collect_target_server_user_from_user
+   collect_target_server_ssh_port_from_user
+   
+   echo "cd'ing into \"$homeDir\" to get ready to scp the tared ${sourceDeployment}: ${taredDeployment}"                       | tee -a $logFile
+   cd $homeDir && echo "We are now in \"$(pwd)\""                                                                              | tee -a $logFile
+
+   pause
+
+   if [ -e "$homeDir/${taredDeployment}" ] ; then
+      scp_tared_deployment
+   else
+      echo                                                                                                                     | tee -a $logFile
+      echo "\"${taredDeployment}\" was not successfully copied!"                                                               | tee -a $logFile
+      echo "Check that:"                                                                                                       | tee -a $logFile
+      echo "A) $homeDir/${taredDeployment} actually exists"                                                                    | tee -a $logFile
+      echo "B) That you have not missed step 2"                                                                                | tee -a $logFile
+      echo "Exiting with failure code."                                                                                        | tee -a $logFile
+      exit $failure                                                                                                            | tee -a $logFile
+   fi
+}
+######################################################################################################################################
+#deploy_script_to_run_on_server() {
+#
+#   collect_target_server_from_user
+#   collect_target_server_user_from_user
+#   collect_target_server_ssh_port_from_user
+      
+#   pause   
+
+#   echo "cd'ing into \"$scriptDir\" to get ready to scp the $remoteWorkScript script to $targetServer"                       | tee -a $logFile
+#   cd $scriptDir && echo "We are now in \"$(pwd)\""                                                               | tee -a $logFile
+
+#   pause
+
+#   if [ -e "$scriptDir/${remoteWorkScript}" ] ; then # Try double [[ ]]
+#      scp_remote_work_script
+#   else
+#      echo                              | tee -a $logFile
+#      echo "The \"${remoteWorkScript}\" script was not successfully copied!"                      | tee -a $logFile
+#      echo "Check that the file actually exists"                                                                    | tee -a $logFile
+#      echo "Exiting with failure code."                                                                   | tee -a $logFile
+#      exit $failure                                                         | tee -a $logFile      
+#   fi
+#}
+######################################################################################################################################
+remote_host_work() {   
+   collect_target_server_from_user
+   collect_target_server_user_from_user
+   collect_target_server_ssh_port_from_user
+   
+   echo "Performing remote host work now ..."                                                                                  | tee -a $logFile
+   declare -r result=$(/usr/bin/ssh $targetServerUser@$targetServer -p $sshPort \
+      remoteTargetServerUser=$targetServerUser \
+      remoteYearMonthDateHourMin=$yearMonthDateHourMin \
+      remoteTaredDeployment=$taredDeployment \
+      remotePublicWebHostingDir=$publicWebHostingDir \
+      remoteProjectHostingDir=$projectHostingDir \
+      remoteProjectHostingUser=$projectHostingUser \
+      remoteInitUnitFile=$initUnitFile \
+      'bash -s' < "$scriptDir/${remoteWorkScript}")
+   echo "$result"                                                                                                              | tee -a $logFile
+}
+######################################################################################################################################
+
+while true; do
+   echo                                                                                                                        | tee -a $logFile
+   echo -e "\033[1mSelect the operation you would like to run from the following menu:\033[0m"                                 | tee -a $logFile
+   echo                                                                                                                        | tee -a $logFile
+   select choice in \
+      "NPM shrinkwrap" \
+      "Package deployment artifact" \
+      "Deploy $taredDeployment to $targetServerUser@$targetServer:~" \
+      "Remote host work" \
+      "I'm done" ; do
+      case $choice in
+         "NPM shrinkwrap" )
+            echo "User selected: shrinkwrap"                                                                                   >> $logFile
+            shrinkwrap            
+            break;;
+         "Package deployment artifact" )
+            echo "User selected: package_deployment_artifact"                                                                  >> $logFile
+            package_deployment_artifact            
+            break;;
+         "Deploy $taredDeployment to $targetServerUser@$targetServer:~" )
+            echo "User selected: deploy_package_to_target_servers_home_dir"                                                    >> $logFile
+            deploy_package_to_target_servers_home_dir
+            break;;
+         "Remote host work" )
+            echo "User selected: remote_host_work"                                                                             >> $logFile
+            remote_host_work
+            break;;
+         "I'm done" )
+            echo "Thanks for flying with BinaryMist"                                                                           >> $logFile
+            echo                                                                                                               >> $logFile
+            print_date_time_host
+            exit;;
+      esac    
+   done
+done
+
+

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Rename this file to package-deploy.cfg
+
+sourceDeployment="</End directory that holds the source you want deployed>"
+homeDir=$HOME
+deploymentSourceDir="<Absolute path to $sourceDeployment>"
+targetServerUser="<The user you use to login to the server you want to host from>"
+targetServer="<The server you want to host from>"
+sshPort="<Self explanatory>"
+readonly yearMonthDateHourMin=$(date '+%Y-%m-%d-%H-%M')
+readonly logFile="</directory/you/want/your/local/logs/in/package-deploy-$yearMonthDateHourMin.log>"
+readonly publicWebHostingDir="</var/www>"
+readonly projectHostingDir="<directory within $publicWebHostingDir usually>"
+readonly projectHostingUser="<owner of $projectHostingDir and files within>"
+readonly initUnitFile="<systemd unit name>.service"
