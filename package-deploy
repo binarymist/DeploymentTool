@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Copyright (c) 2015, Kim Carter
+# All rights reserved.
+
+# This is the main script that orchestrates the deployment from the development machine.
+# If any of it is not clear, please submit a bug and I'll modify the source to be more understandable ;-)
+
 host=$(hostname)
 readonly scriptDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $scriptDir/package-deploy.cfg
@@ -10,28 +16,62 @@ readonly success=0
 readonly remoteWorkScript="remoteWork"
 
 echo                                                                                                                           | tee -a $logFile
-echo -e    "\033[1;45m+==============================================================================+\033[0m"                 | tee -a $logFile
-echo -e    "\033[1;45m|                                                                              |\033[0m"                 | tee -a $logFile
-echo -e    "\033[1;45m|                  Welcome to the BinaryMist Deployment Tool!                  |\033[0m"                 | tee -a $logFile
-echo -e    "\033[1;45m|                                                                              |\033[0m"                 | tee -a $logFile
-echo -e    "\033[1;45m+==============================================================================+\033[0m"                 | tee -a $logFile
-echo -e "\033[1;30;47m                                                                                \033[0m"                 | tee -a $logFile
-echo -e "\033[1;30;47m               I deploy from a project directory of your choosing               \033[0m"                 | tee -a $logFile
-echo -e "\033[1;30;47m--------------------------------------------------------------------------------\033[0m"                 | tee -a $logFile
+echo -e    "\033[1;45m1 01000010 01101001 01101110 01100001 01110010 01111001 01001101 01101001 01110011 01110100 1\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m0                                                                                           7\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m2                                      Welcome to the                                       1\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|                                                                                           |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m1                                                                                           1\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m5     ▄▄▄▄    ██▓ ███▄    █  ▄▄▄       ██▀███ ▓██   ██▓ ███▄ ▄███▓ ██▓  ██████ ▄▄▄█████▓    1\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m1    ▓█████▄ ▓██▒ ██ ▀█   █ ▒████▄    ▓██ ▒ ██▒▒██  ██▒▓██▒▀█▀ ██▒▓██▒▒██    ▒ ▓  ██▒ ▓▒    5\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|    ▒██▒ ▄██▒██▒▓██  ▀█ ██▒▒██  ▀█▄  ▓██ ░▄█ ▒ ▒██ ██░▓██    ▓██░▒██▒░ ▓██▄   ▒ ▓██░ ▒░    |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m1    ▒██░█▀  ░██░▓██▒  ▐▌██▒░██▄▄▄▄██ ▒██▀▀█▄   ░ ▐██▓░▒██    ▒██ ░██░  ▒   ██▒░ ▓██▓ ░     1\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m5    ░▓█  ▀█▓░██░▒██░   ▓██░ ▓█   ▓██▒░██▓ ▒██▒ ░ ██▒▓░▒██▒   ░██▒░██░▒██████▒▒  ▒██▒ ░     5\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m6    ░▒▓███▀▒░▓  ░ ▒░   ▒ ▒  ▒▒   ▓▒█░░ ▒▓ ░▒▓░  ██▒▒▒ ░ ▒░   ░  ░░▓  ▒ ▒▓▒ ▒ ░  ▒ ░░       1\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|    ▒░▒   ░  ▒ ░░ ░░   ░ ▒░  ▒   ▒▒ ░  ░▒ ░ ▒░▓██ ░▒░ ░  ░      ░ ▒ ░░ ░▒  ░ ░    ░        |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m1     ░    ░  ▒ ░   ░   ░ ░   ░   ▒     ░░   ░ ▒ ▒ ░░  ░      ░    ▒ ░░  ░  ░    ░          1\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m4     ░       ░           ░       ░  ░   ░     ░ ░            ░    ░        ░               6\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m1          ░                                   ░ ░                                          3\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|                                                                                           |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m1                                      Deployment Tool                                      1\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m6                                                                                           6\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m2 01000010 01101001 01101110 01100001 01110010 01111001 01001101 01101001 01110011 01110100 4\033[0m"    | tee -a $logFile       
 
+echo -e "\033[1;30;47m+-------------------------------------------------------------------------------------------+\033[0m"    | tee -a $logFile
+echo -e "\033[1;30;47m|                                                                                           |\033[0m"    | tee -a $logFile
+echo -e "\033[1;30;47m|               I deploy from a project directory of your choosing                          |\033[0m"    | tee -a $logFile
+echo -e "\033[1;30;47m|            To a hosting directory of your choosing on another server                      |\033[0m"    | tee -a $logFile
+echo -e "\033[1;30;47m|                                                                                           |\033[0m"    | tee -a $logFile
+echo -e "\033[1;30;47m+-------------------------------------------------------------------------------------------+\033[0m"    | tee -a $logFile
+
+echo -e    "\033[1;45m+-------------------------------------------------------------------------------------------+\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|                                                                                           |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|                        Welcome to the BinaryMist Deployment Tool!                         |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|                                                                                           |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|                                                                                           |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|    Be sure to visit              https://binarymist.io                                    |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|    Feel free to submit:  • bug requrests  • ideas for improvements  • pull requests       |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|                                                                                           |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|    You can find the documentation by reading the code. If it's not clear what it does,    |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|    submit a bug telling me what's not clear and I'll refactor the code,                   |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|    then check back with you to make sure it's clear.                                      |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|                                                                                           |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|    This project is licensed under the BSD 3-clause “New” or “Revised” License.            |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|    For more information please see the licence file                                       |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m|                                                                                           |\033[0m"    | tee -a $logFile
+echo -e    "\033[1;45m+-------------------------------------------------------------------------------------------+\033[0m"    | tee -a $logFile
+# Text art provided from http://patorjk.com/software/taag/#p=display&f=Bloody&t=BinaryMist
 
 print_date_time_host() {
 defaultDate=$(date)
 echo                                                                                                                           | tee -a $logFile
 echo                                                                                                                           | tee -a $logFile
-echo "--------------------------------------------------------------------------------"                                        | tee -a $logFile
-echo "$completionState time: $defaultDate                   Host:$host"                                                        | tee -a $logFile
-echo "--------------------------------------------------------------------------------"                                        | tee -a $logFile
+echo "---------------------------------------------------------------------------------------------"                           | tee -a $logFile
+echo "$completionState time: $defaultDate                            Host : $host"                                             | tee -a $logFile
+echo "---------------------------------------------------------------------------------------------"                           | tee -a $logFile
 echo                                                                                                                           | tee -a $logFile
 completionState='End  '
 }
 
-print_date_time_host
 
 pause(){
    read -n1 -rsp $'Press any key to continue...\n'                                                                             | tee -a $logFile
@@ -297,6 +337,7 @@ remote_host_work() {
    collect_target_server_ssh_port_from_user
    
    echo "Performing remote host work now ..."                                                                                  | tee -a $logFile
+   echo                                                                                                                        | tee -a $logFile
    declare -r result=$(/usr/bin/ssh $targetServerUser@$targetServer -p $sshPort \
       remoteTargetServerUser=$targetServerUser \
       remoteYearMonthDateHourMin=$yearMonthDateHourMin \
@@ -309,7 +350,7 @@ remote_host_work() {
    echo "$result"                                                                                                              | tee -a $logFile
 }
 ######################################################################################################################################
-
+print_date_time_host
 while true; do
    echo                                                                                                                        | tee -a $logFile
    echo -e "\033[1mSelect the operation you would like to run from the following menu:\033[0m"                                 | tee -a $logFile
@@ -345,5 +386,5 @@ while true; do
       esac    
    done
 done
-
+print_date_time_host
 

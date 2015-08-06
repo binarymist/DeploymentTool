@@ -1,6 +1,10 @@
 #!/bin/bash
 
-# Rename this file to package-deploy.cfg
+# Copyright (c) 2015, Kim Carter
+# All rights reserved.
+
+# Rename this file to package-deploy.cfg and change the variable values to suite your environment.
+# If any of these are not clear, please submit a bug and I'll modify the source to be more understandable ;-)
 
 sourceDeployment="</End directory that holds the source you want deployed>"
 homeDir=$HOME

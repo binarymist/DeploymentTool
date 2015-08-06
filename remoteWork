@@ -1,4 +1,10 @@
 #!/bin/bash
+
+# Copyright (c) 2015, Kim Carter
+# All rights reserved.
+
+# This is the script that orchestrates the deployment on the target server.
+# If any of it is not clear, please submit a bug and I'll modify the source to be more understandable ;-)
        
 logFile="/home/$remoteTargetServerUser/remoteWork-$remoteYearMonthDateHourMin.log"
 readonly thisFile="/home/$remoteTargetServerUser/remoteWork"
@@ -9,7 +15,7 @@ create_rollback_of_project_hosting_dir() {
    echo "The \"$(pwd)\" directories listing currently looks like:"                                                                                    | tee -a $logFile 
    echo "$(ls -liah)"                                                                                                                                 | tee -a $logFile
    echo                                                                                                                                               | tee -a $logFile
-   echo "Now copying $remoteProjectHostingDir to $remoteProjectHostingDir-$remoteYearMonthDateHourMin"                                                | tee -a $logFile
+   echo "Now copying \"$remoteProjectHostingDir\" to \"$remoteProjectHostingDir-$remoteYearMonthDateHourMin\""                                        | tee -a $logFile
    cp -r $remoteProjectHostingDir "$remoteProjectHostingDir-$remoteYearMonthDateHourMin" 2>&1                                                         | tee -a $logFile
    echo "The \"$(pwd)\" directories listing now looks like:"                                                                                          | tee -a $logFile
    echo "$(ls -liah)"                                                                                                                                 | tee -a $logFile
@@ -23,7 +29,7 @@ clear_out_target_hosting_directory() {
    echo                                                                                                                                               | tee -a $logFile
    cd "${remotePublicWebHostingDir}/${remoteProjectHostingDir}/"
    echo "We're now in \"$(pwd)/\""                                                                                                                    | tee -a $logFile
-   sudo rm -rfv ${remotePublicWebHostingDir}/${remoteProjectHostingDir}/*                                                     #test logging here
+   sudo rm -rfv ${remotePublicWebHostingDir}/${remoteProjectHostingDir}/*
    echo "After the delete, the \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory listing looks like:"                                | tee -a $logFile
    echo "$(ls $remotePublicWebHostingDir/$remoteProjectHostingDir/ -liah)"                                                                            | tee -a $logFile
    echo                                                                                                                                               | tee -a $logFile
@@ -48,7 +54,7 @@ extract_remoteTaredDeployment_files_to_remoteProjectHostingDir() {
 }
 
 update_file_ownership_and_perms_of_files_in_remoteProjectHostingDir() {
-   echo "Attempting to change the ownership and set perms to 550 on all files within $remotePublicWebHostingDir/$remoteProjectHostingDir/"            | tee -a $logFile
+   echo "Attempting to change the ownership and set perms to 550 on all files within \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\""        | tee -a $logFile
    echo "cd'ing into \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\""                                                                        | tee -a $logFile
    cd "${remotePublicWebHostingDir}/${remoteProjectHostingDir}/"
    echo "Checking we're in the \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory"                                                    | tee -a $logFile
@@ -100,15 +106,9 @@ restart_webapp() {
 }
 
 
-
-#echo "Now that \"$thisFile\" is in memory on $(hostname) we will delete it"                   | tee -a $logFile
-#rm $thisFile 2>&1                  | tee -a $logFile
-
-
-
 create_rollback_of_project_hosting_dir
-#clear_out_target_hosting_directory
-#extract_remoteTaredDeployment_files_to_remoteProjectHostingDir
-#update_file_ownership_and_perms_of_files_in_remoteProjectHostingDir
-#restart_webapp
+clear_out_target_hosting_directory
+extract_remoteTaredDeployment_files_to_remoteProjectHostingDir
+update_file_ownership_and_perms_of_files_in_remoteProjectHostingDir
+restart_webapp
 
