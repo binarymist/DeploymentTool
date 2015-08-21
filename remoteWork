@@ -10,101 +10,101 @@ logFile="/home/$remoteTargetServerUser/remoteWork-$remoteYearMonthDateHourMin.lo
 readonly thisFile="/home/$remoteTargetServerUser/remoteWork"
 
 create_rollback_of_project_hosting_dir() {
-   echo "cd'ing into \"${remotePublicWebHostingDir}\""                                                                                                #| tee -a $logFile
-   cd $remotePublicWebHostingDir && echo "We are now in \"$(pwd)\""                                                                                   #| tee -a $logFile 
-   echo "The \"$(pwd)\" directories listing currently looks like:"                                                                                    #| tee -a $logFile 
-   echo "$(ls -liah)"                                                                                                                                 #| tee -a $logFile
-   echo                                                                                                                                               #| tee -a $logFile
-   echo "Now copying \"$remoteProjectHostingDir\" to \"$remoteProjectHostingDir-$remoteYearMonthDateHourMin\""                                        #| tee -a $logFile
-   cp -r $remoteProjectHostingDir "$remoteProjectHostingDir-$remoteYearMonthDateHourMin" 2>&1                                                         #| tee -a $logFile
-   echo "The \"$(pwd)\" directories listing now looks like:"                                                                                          #| tee -a $logFile
-   echo "$(ls -liah)"                                                                                                                                 #| tee -a $logFile
-   echo                                                                                                                                               #| tee -a $logFile
+   echo "cd'ing into \"${remotePublicWebHostingDir}\""
+   cd $remotePublicWebHostingDir && echo "We are now in \"$(pwd)\""
+   echo "The \"$(pwd)\" directories listing currently looks like:"
+   echo "$(ls -liah)"
+   echo
+   echo "Now copying \"$remoteProjectHostingDir\" to \"$remoteProjectHostingDir-$remoteYearMonthDateHourMin\""
+   cp -r $remoteProjectHostingDir "$remoteProjectHostingDir-$remoteYearMonthDateHourMin" 2>&1
+   echo "The \"$(pwd)\" directories listing now looks like:"
+   echo "$(ls -liah)"
+   echo
 }
 
 clear_out_target_hosting_directory() {
    echo "About to delete the contents of \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\""
-   echo "The \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory listing currently looks like:"                                        #| tee -a $logFile
-   echo "$(ls $remotePublicWebHostingDir/$remoteProjectHostingDir/ -liah)"                                                                            #| tee -a $logFile
-   echo                                                                                                                                               #| tee -a $logFile
+   echo "The \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory listing currently looks like:"
+   echo "$(ls $remotePublicWebHostingDir/$remoteProjectHostingDir/ -liah)"
+   echo
    cd "${remotePublicWebHostingDir}/${remoteProjectHostingDir}/"
-   echo "We're now in \"$(pwd)/\""                                                                                                                    #| tee -a $logFile
+   echo "We're now in \"$(pwd)/\""
    sudo rm -rfv ${remotePublicWebHostingDir}/${remoteProjectHostingDir}/*
-   echo "After the delete, the \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory listing looks like:"                                #| tee -a $logFile
-   echo "$(ls $remotePublicWebHostingDir/$remoteProjectHostingDir/ -liah)"                                                                            #| tee -a $logFile
-   echo                                                                                                                                               #| tee -a $logFile
+   echo "After the delete, the \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory listing looks like:"
+   echo "$(ls $remotePublicWebHostingDir/$remoteProjectHostingDir/ -liah)"
+   echo
 }
 
 extract_remoteTaredDeployment_files_to_remoteProjectHostingDir() {
-   echo "cd'ing into \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\""                                                                        #| tee -a $logFile
+   echo "cd'ing into \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\""
    cd "${remotePublicWebHostingDir}/${remoteProjectHostingDir}/"
-   echo "Checking we're in the \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory"                                                    #| tee -a $logFile
-   if [[ "$remotePublicWebHostingDir/$remoteProjectHostingDir" == $(pwd) ]]; then 
-      echo "... And we are ..."                                                                                                                       #| tee -a $logFile
-      echo "Now lets unpack \"/home/$remoteTargetServerUser/$remoteTaredDeployment\" to \"$(pwd)\""                                                   #| tee -a $logFile
+   echo "Checking we're in the \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory"
+   if [[ "$remotePublicWebHostingDir/$remoteProjectHostingDir" == $(pwd) ]]; then
+      echo "... And we are ..."
+      echo "Now lets unpack \"/home/$remoteTargetServerUser/$remoteTaredDeployment\" to \"$(pwd)\""
       sudo tar -zxvf "/home/$remoteTargetServerUser/$remoteTaredDeployment"
    else
-      echo "... And we are not! ..."                                                                                                                  #| tee -a $logFile
-      echo "Exiting with failure code."                                                                                                               #| tee -a $logFile
-      exit $failure                                                                                                                                   #| tee -a $logFile
-   fi   
-   echo "After the unpack, the \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory listing looks like:"                                #| tee -a $logFile
-   echo "$(ls $remotePublicWebHostingDir/$remoteProjectHostingDir/ -liah)"                                                                            #| tee -a $logFile
-   echo                                                                                                                                               #| tee -a $logFile
+      echo "... And we are not! ..."
+      echo "Exiting with failure code."
+      exit $failure
+   fi
+   echo "After the unpack, the \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory listing looks like:"
+   echo "$(ls $remotePublicWebHostingDir/$remoteProjectHostingDir/ -liah)"
+   echo
 }
 
 update_file_ownership_and_perms_of_files_in_remoteProjectHostingDir() {
-   echo "Attempting to change the ownership and set perms to 550 on all files within \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\""        #| tee -a $logFile
-   echo "cd'ing into \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\""                                                                        #| tee -a $logFile
+   echo "Attempting to change the ownership and set perms to 550 on all files within \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\""
+   echo "cd'ing into \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\""
    cd "${remotePublicWebHostingDir}/${remoteProjectHostingDir}/"
-   echo "Checking we're in the \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory"                                                    #| tee -a $logFile
-   if [[ "$remotePublicWebHostingDir/$remoteProjectHostingDir" == $(pwd) ]]; then 
-      sudo chown -R $remoteProjectHostingUser "$remotePublicWebHostingDir/$remoteProjectHostingDir/" 2>&1                                             #| tee -a $logFile
-      sudo chmod -R 550 "$remotePublicWebHostingDir/$remoteProjectHostingDir/" 2>&1                                                                   #| tee -a $logFile
-      echo "After the change of ownership and perms, the \"$remotePublicWebHostingDir/\" directory listing looks like:"                               #| tee -a $logFile
-      echo "$(ls $remotePublicWebHostingDir -liah)"                                                                                                   #| tee -a $logFile
-      echo                                                                                                                                            #| tee -a $logFile
-      echo "And it's contents looks like:"                                                                                                            #| tee -a $logFile
-      echo "$(ls $remotePublicWebHostingDir/$remoteProjectHostingDir/ -liah)"                                                                         #| tee -a $logFile
+   echo "Checking we're in the \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory"
+   if [[ "$remotePublicWebHostingDir/$remoteProjectHostingDir" == $(pwd) ]]; then
+      sudo chown -R $remoteProjectHostingUser "$remotePublicWebHostingDir/$remoteProjectHostingDir/" 2>&1
+      sudo chmod -R 550 "$remotePublicWebHostingDir/$remoteProjectHostingDir/" 2>&1
+      echo "After the change of ownership and perms, the \"$remotePublicWebHostingDir/\" directory listing looks like:"
+      echo "$(ls $remotePublicWebHostingDir -liah)"
+      echo
+      echo "And it's contents looks like:"
+      echo "$(ls $remotePublicWebHostingDir/$remoteProjectHostingDir/ -liah)"
    else
-      echo "\"$(pwd)\" is not the correct directory"                                                                                                  #| tee -a $logFile
-      echo "Exiting with failure code."                                                                                                               #| tee -a $logFile
-      exit $failure                                                                                                                                   #| tee -a $logFile
-   fi   
-   echo                                                                                                                                               #| tee -a $logFile
+      echo "\"$(pwd)\" is not the correct directory"
+      echo "Exiting with failure code."
+      exit $failure
+   fi
+   echo
 }
 
-restart_webapp() { 
+restart_webapp() {
    declare -i time=5
    declare -ri maxWait=10
-   
-   echo "The $remoteInitUnitFile is currently in the following status:"                                                                               #| tee -a $logFile
-   echo "$(systemctl status $remoteInitUnitFile)"                                                                                                     #| tee -a $logFile
-   echo                                                                                                                                               #| tee -a $logFile
-   echo "Attempting to restart the $remoteInitUnitFile for the first time"                                                                            #| tee -a $logFile
-   sudo systemctl restart $remoteInitUnitFile 2>&1                                                                                                    #| tee -a $logFile
-   echo "Waiting for $time seocnds until we check the $remoteInitUnitFile status"                                                                     #| tee -a $logFile
+
+   echo "The $remoteInitUnitFile is currently in the following status:"
+   echo "$(systemctl status $remoteInitUnitFile)"
+   echo
+   echo "Attempting to restart the $remoteInitUnitFile for the first time"
+   sudo systemctl restart $remoteInitUnitFile 2>&1
+   echo "Waiting for $time seocnds until we check the $remoteInitUnitFile status"
    sleep $time
    echo "Finished waiting now."
    while [[ $(systemctl status $remoteInitUnitFile) != *running* ]] || [[ $time < $maxWait ]] ; do
-      echo "The $remoteInitUnitFile is currently in the following status:"                                                                            #| tee -a $logFile
-      echo "$(systemctl status $remoteInitUnitFile)"                                                                                                     #| tee -a $logFile
-      echo "Attempting to restart the $remoteInitUnitFile"                                                                                            #| tee -a $logFile
-      sudo systemctl restart $remoteInitUnitFile 2>&1                                                                                                 #| tee -a $logFile
+      echo "The $remoteInitUnitFile is currently in the following status:"
+      echo "$(systemctl status $remoteInitUnitFile)"
+      echo "Attempting to restart the $remoteInitUnitFile"
+      sudo systemctl restart $remoteInitUnitFile 2>&1
       time=$time+1
       if [[ $time -lt $maxWait ]] ; then
-         echo "Waiting for $time seocnds until we check the $remoteInitUnitFile status again"                                                         #| tee -a $logFile
+         echo "Waiting for $time seocnds until we check the $remoteInitUnitFile status again"
          echo
          sleep $time
       else
          break
-      fi      
+      fi
    done
    if [[ $(systemctl status $remoteInitUnitFile) != *running* ]] ; then
-      echo "The $remoteInitUnitFile was unable to be started. Please address!"                                                                        #| tee -a $logFile
+      echo "The $remoteInitUnitFile was unable to be started. Please address!"
    else
-      echo "Finishing \"restart webapp\". The $remoteInitUnitFile is currently in the following status:"                                              #| tee -a $logFile
-      echo "$(systemctl status $remoteInitUnitFile)"                                                                                                  #| tee -a $logFile
+      echo "Finishing \"restart webapp\". The $remoteInitUnitFile is currently in the following status:"
+      echo "$(systemctl status $remoteInitUnitFile)"
    fi
 }
 
