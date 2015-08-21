@@ -59,7 +59,8 @@ echo -e    "\033[1;45m|    This project is licensed under the BSD 3-clause “Ne
 echo -e    "\033[1;45m|    For more information please see the licence file                                       |\033[0m"    | tee -a $logFile
 echo -e    "\033[1;45m|                                                                                           |\033[0m"    | tee -a $logFile
 echo -e    "\033[1;45m+-------------------------------------------------------------------------------------------+\033[0m"    | tee -a $logFile
-# Text art provided from http://patorjk.com/software/taag/#p=display&f=Bloody&t=BinaryMist
+# Colour coding specs by: http://www.bashguru.com/2010/01/shell-colors-colorizing-shell-scripts.html
+# Text art provided by: http://patorjk.com/software/taag/#p=display&f=Bloody&t=BinaryMist
 
 print_date_time_host() {
 defaultDate=$(date)
