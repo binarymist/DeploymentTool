@@ -30,6 +30,7 @@ clear_out_target_hosting_directory() {
    cd "${remotePublicWebHostingDir}/${remoteProjectHostingDir}/"
    echo "We're now in \"$(pwd)/\""
    sudo rm -rfv ${remotePublicWebHostingDir}/${remoteProjectHostingDir}/*
+   echo
    echo "After the delete, the \"$remotePublicWebHostingDir/$remoteProjectHostingDir/\" directory listing looks like:"
    echo "$(ls $remotePublicWebHostingDir/$remoteProjectHostingDir/ -liah)"
    echo
@@ -42,6 +43,7 @@ extract_remoteTaredDeployment_files_to_remoteProjectHostingDir() {
    if [[ "$remotePublicWebHostingDir/$remoteProjectHostingDir" == $(pwd) ]]; then
       echo "... And we are ..."
       echo "Now lets unpack \"/home/$remoteTargetServerUser/$remoteTaredDeployment\" to \"$(pwd)\""
+      echo
       sudo tar -zxvf "/home/$remoteTargetServerUser/$remoteTaredDeployment"
    else
       echo "... And we are not! ..."

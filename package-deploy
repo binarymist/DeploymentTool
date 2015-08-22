@@ -138,6 +138,8 @@ package_deployment_artifact() {
    echo "The following are the target files & dirs from the root dir to be packaged into \"$homeDir/${taredDeployment}\":"     | tee -a $logFile
    ls -liah                                                                                                                    | tee -a $logFile
    echo                                                                                                                        | tee -a $logFile
+   echo "Make sure you have removed any logging files or other, that you don't want to deploy :-)"                             | tee -a $logFile
+   echo                                                                                                                        | tee -a $logFile
    pause
    echo "Right. Lets tar up..."                                                                                                | tee -a $logFile
 
