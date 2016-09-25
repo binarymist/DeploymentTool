@@ -40,4 +40,11 @@ I.E. I just run each in order, starting with the first like this:
 When you're making changes to the `remoteWork` file. You don't need to restart the main script each time you execute the "Remote host work" main menu option, as the `remoteWork` script is directed to a shell command on the local side, then used as a SSH argument each time we SSH ("Remote host work") to the target deployment server.
 The function that does this is `remote_host_work`. Bear in mind that each time you restart the main script, the date fields are repopulated, so new deployment files will be created. this is not usually what you want to happen, unless you actually want to repackage another source deployment.
 
+## sudoers
+
+Add all commands in the `remoteWork` file that are prefixed with `sudo` to the `/etc/sudoers` file, other wise they will fail. Be specific about these commands, otherwise you are giving the script more privileges than it needs.
+
+I usually like to add the sudo commands seperated by a `,` to a `Cmnd_Alias`. If you have any trouble constructing your `/etc/sudoers` file, submit an issue and I can help you with it.
+
 If anythings not clear please submit a bug. 
+
