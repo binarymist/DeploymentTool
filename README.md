@@ -44,7 +44,7 @@ The function that does this is `remote_host_work`. Bear in mind that each time y
 
 Add all commands in the `remoteWork` file that are prefixed with `sudo` to the `/etc/sudoers` file, other wise they will fail. Be specific about these commands, otherwise you are giving the script more privileges than it needs.
 
-I usually like to add the sudo commands seperated by a `,` to a `Cmnd_Alias`. If you have any trouble constructing your `/etc/sudoers` file, submit an issue and I can help you with it.
+I usually like to add the sudo commands seperated by a `,` to a `Cmnd_Alias`. If you have any trouble constructing your `/etc/sudoers` file, check the [man page](https://linux.die.net/man/5/sudoers), if you are still struggling, submit an issue and I will help you with it.
 
 If anythings not clear please submit a bug. 
 
